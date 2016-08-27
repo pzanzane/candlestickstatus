@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="pankaj.CandleStickStatus.ActivityHome">
+
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        tools:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+    <Button
+        android:id="@+id/btnStartDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/my_toolbar"
+        android:text="Start Date"/>
+
+    <TextView
+        android:id="@+id/txtLessThan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/btnStartDate"
+        android:layout_alignTop="@id/btnStartDate"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@id/btnStartDate"
+        android:gravity="center"
+        android:text=" &#60; "
+        android:textSize="26dp" />
+
+    <Button
+        android:id="@+id/btnEndDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_alignTop="@id/btnStartDate"
+        android:layout_toRightOf="@id/txtLessThan"
+        android:text="End Date"/>
+
+
+    <Button
+        android:id="@+id/btnProcess"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/btnEndDate"
+        android:text="Process"
+        android:layout_alignTop="@id/btnStartDate"
+        android:layout_alignParentRight="true"/>
+
+    <TextView
+        android:id="@+id/txtFromToDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnStartDate"
+        android:layout_centerHorizontal="true"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        />
+    <ListView
+
+        android:id="@+id/listStocks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtFromToDate"
+        android:layout_marginTop="5dp"></ListView>
+</RelativeLayout>

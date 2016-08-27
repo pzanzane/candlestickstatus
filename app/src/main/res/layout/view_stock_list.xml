@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="5dp"
+    >
+
+    <RelativeLayout
+        android:id="@+id/relInternalView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+
+
+        <TextView
+            android:id="@+id/txtStockName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="stock name"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/txtCandleStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="Boring"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/txtPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txtStockName"
+            android:layout_marginTop="10dp"
+            android:textStyle="bold"
+            android:text="OPEN: 1618.35 \t\tCLOSE: 1645.8 \nHIGH: 1736.4 \t\t\tLOW: 1569.05"/>
+    </RelativeLayout>
+
+</RelativeLayout>

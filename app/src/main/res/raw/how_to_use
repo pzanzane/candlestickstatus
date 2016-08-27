@@ -1,0 +1,28 @@
+Hi,
+I am one of the OTA student and an Android Application Developer.
+I have developed this App to scan Bigtradelist stocks to check Candle Status (Boring, Green, Red) In the given Date Range.
+
+* How to use this App?
+-If you want to scan the stock for specific day, select Start Date and End Date a same date and click on process.
+
+-If you want to scan the stock for specific week,select Start Date as Monday End Date as a Friday of the Week and click on process.
+
+-If you want to scan the stock for specific Month,select Start Date as First Day of Month and  End Date as a last day of the Month and click on process.
+
+
+* Technical Limitation With this App?
+- I was unable to find any free API which provides Data for current day at the End of the Day with Open and Close Values.
+So you cant check Today's Candle, You can select only till Yesterday.
+
+- If You need Daily chart Status of Todays Closing, you have to scan this in next Day Morning and cannot be scanned Today Itself,
+I am trying to find a way to acheive this if any one of you come across any solution please feel free to contact me.
+Make sure you write [OTA] in Subject.
+
+* Special Request
+ - Don't Select a Holiday Date as Start Date or End Date ,This will crash the Application and you have to start again.
+ - Check Holiday List in menu
+
+Email: pzanzane@gmail.com
+
+Regards,
+Pankaj Zanzane.

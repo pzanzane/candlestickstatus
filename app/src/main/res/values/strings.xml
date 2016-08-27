@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CandleStick Status</string>
+    <string name="read_me">Read Me</string>
+    <string name="nse_holidays">NSE Holidays</string>
+</resources>
