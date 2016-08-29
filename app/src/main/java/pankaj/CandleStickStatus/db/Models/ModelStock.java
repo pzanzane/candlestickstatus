@@ -31,7 +31,7 @@ public class ModelStock implements DbModel {
     }
 
     public enum CandleStatus{
-        BORING,EXCITING_GREEN,EXCITING_RED
+        EXCITING_GREEN,EXCITING_RED,BORING
     }
     private String symbol = null;
 
@@ -103,7 +103,7 @@ public class ModelStock implements DbModel {
         return candleStatus;
     }
 
-    public void process(){
+    public CandleStatus process(){
         if((Math.abs(open-close)<=((Math.abs(high-low)/2)))){
             candleStatus = CandleStatus.BORING;
         }else if(open<close){
@@ -111,5 +111,6 @@ public class ModelStock implements DbModel {
         }else{
             candleStatus = CandleStatus.EXCITING_RED;
         }
+        return candleStatus;
     }
 }

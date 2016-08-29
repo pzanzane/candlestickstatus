@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,24 +23,30 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
+import pankaj.CandleStickStatus.DialogSortOptions.ISortCallBack;
 import pankaj.CandleStickStatus.adapters.AdapterListStocks;
 import pankaj.CandleStickStatus.db.Models.ModelCategory;
 import pankaj.CandleStickStatus.db.Models.ModelStock;
 import pankaj.CandleStickStatus.db.Models.ModelStockCategory;
 import pankaj.CandleStickStatus.helpers.AsyncTaskArrayCompletionListener;
 import pankaj.CandleStickStatus.helpers.IOUtils;
+import pankaj.CandleStickStatus.helpers.PreferenceUtils;
 import pankaj.CandleStickStatus.helpers.UtilDateFormat;
 import pankaj.CandleStickStatus.helpers.Utility;
 
-public class ActivityHome extends AppCompatActivity implements AsyncTaskArrayCompletionListener<ModelStock>, View.OnClickListener {
+public class ActivityHome extends AppCompatActivity implements AsyncTaskArrayCompletionListener<ModelStock>, View.OnClickListener,
+        ISortCallBack {
 
     private Button btnStartDate, btnEndDate = null, btnProcess = null;
     private ListView mListViewStocks = null;
     private Calendar calendarStartDate, calendarEndDate;
     private TextView txtFromToDate = null;
+    private ProgressBar progressbar = null;
+    private AdapterListStocks adapterListStocks = null;
 
 
     @Override
@@ -56,6 +63,7 @@ public class ActivityHome extends AppCompatActivity implements AsyncTaskArrayCom
         btnEndDate = (Button) findViewById(R.id.btnEndDate);
         btnProcess = (Button) findViewById(R.id.btnProcess);
         txtFromToDate = (TextView) findViewById(R.id.txtFromToDate);
+        progressbar = (ProgressBar) findViewById(R.id.progressbar);
 
         mListViewStocks = (ListView) findViewById(R.id.listStocks);
 
@@ -70,7 +78,17 @@ public class ActivityHome extends AppCompatActivity implements AsyncTaskArrayCom
     public void onTaskComplete(ArrayList<ModelStock> listModelPrices) {
 
 
-        mListViewStocks.setAdapter(new AdapterListStocks(this, 0, listModelPrices));
+        progressbar.setVisibility(View.GONE);
+        String dateTime = UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, calendarStartDate.getTime()) + "     To   " + UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, calendarEndDate.getTime());
+        String candlesCount = " Green: " + PreferenceUtils.getInteger(this, PreferenceUtils.GREEN_CANDLE_COUNT)
+                + " Red: " + PreferenceUtils.getInteger(this, PreferenceUtils.RED_CANDLE_COUNT)
+                + " Boring: " + PreferenceUtils.getInteger(this, PreferenceUtils.BORING_CANDLE_COUNT);
+
+        txtFromToDate.setText(dateTime + "\n" + candlesCount);
+
+        adapterListStocks = new AdapterListStocks(this, 0, listModelPrices);
+        sortList(PreferenceUtils.getInteger(this, PreferenceUtils.SORT_TYPE));
+        mListViewStocks.setAdapter(adapterListStocks);
     }
 
     @Override
@@ -92,7 +110,7 @@ public class ActivityHome extends AppCompatActivity implements AsyncTaskArrayCom
                 btnEndDate.setText("End Date");
 
                 return;
-            }else if(!(calendarStartDate.getTime().getTime()<=calendarEndDate.getTime().getTime())){
+            } else if (!(calendarStartDate.getTime().getTime() <= calendarEndDate.getTime().getTime())) {
 
                 Toast.makeText(ActivityHome.this, "Start Date should be Less than End Date", Toast.LENGTH_SHORT).show();
                 return;
@@ -151,11 +169,16 @@ public class ActivityHome extends AppCompatActivity implements AsyncTaskArrayCom
 
         if (item.getItemId() == R.id.action_readme) {
             showAlertDialog(readFile(R.raw.how_to_use));
-        }else if(item.getItemId() == R.id.action_holidays){
+        } else if (item.getItemId() == R.id.action_holidays) {
             showAlertDialog(readFile(R.raw.nse_holidays));
+        } else if (item.getItemId() == R.id.action_sort) {
+
+            DialogSortOptions diaologFrag = new DialogSortOptions();
+            diaologFrag.show(getSupportFragmentManager(), "DialogSortOptions");
         }
         return true;
     }
+
 
     private void showAlertDialog(String message) {
 
@@ -185,9 +208,12 @@ public class ActivityHome extends AppCompatActivity implements AsyncTaskArrayCom
     }
 
     private void fetchStocks() throws IOException, JSONException {
-        txtFromToDate.setText(UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, calendarStartDate.getTime()) + "     To   " + UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, calendarEndDate.getTime()));
 
+        if (adapterListStocks != null) {
+            adapterListStocks.clear();
+        }
 
+        progressbar.setVisibility(View.VISIBLE);
         List<ModelCategory> modelCategory = Utility.getList(ActivityHome.this);
 
 
@@ -210,9 +236,6 @@ public class ActivityHome extends AppCompatActivity implements AsyncTaskArrayCom
 
     private void fetchStocksWithCategories() throws IOException, JSONException {
 
-        txtFromToDate.setText(UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, calendarStartDate.getTime()) + "     To   " + UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, calendarEndDate.getTime()));
-
-
         AsyncCategoryCandleStatus async = new AsyncCategoryCandleStatus(
                 ActivityHome.this, new AsyncTaskArrayCompletionListener<ModelStockCategory>() {
             @Override
@@ -233,6 +256,51 @@ public class ActivityHome extends AppCompatActivity implements AsyncTaskArrayCom
         async.execute();
 
 
+    }
+
+    @Override
+    public void sortCallBack(int checkId) {
+
+        PreferenceUtils.putInteger(StockpricetickerApplication.getBasicApplicationContext(), PreferenceUtils.SORT_TYPE, checkId);
+        sortList(checkId);
+    }
+
+    private void sortList(int selectedPreferenceId) {
+
+        if (adapterListStocks != null) {
+            Collections.sort(adapterListStocks.getList(), new SortComparator(PreferenceUtils.getInteger(this, PreferenceUtils.SORT_TYPE)));
+            adapterListStocks.notifyDataSetChanged();
+        }
+
+    }
+
+    private static class SortComparator implements Comparator<ModelStock> {
+
+        private int selectionPreference = -1;
+
+        public SortComparator(int selectionPreference) {
+            this.selectionPreference = selectionPreference;
+        }
+
+        @Override
+        public int compare(ModelStock lhs, ModelStock rhs) {
+
+            switch (selectionPreference) {
+                case R.id.radioName:
+                    return lhs.getSymbol().compareTo(rhs.getSymbol());
+
+                case R.id.radioCandleStatus:
+                    if(lhs.getCandleStatus().ordinal() > rhs.getCandleStatus().ordinal()){
+                        return 1;
+                    }else if(lhs.getCandleStatus().ordinal() < rhs.getCandleStatus().ordinal()){
+                        return -1;
+                    }else{
+                        return 0;
+                    }
+
+            }
+            return 0;
+        }
     }
 }
 

@@ -23,6 +23,7 @@ import pankaj.CandleStickStatus.db.Models.ModelStock;
 import pankaj.CandleStickStatus.db.dao.ModelStockDao;
 import pankaj.CandleStickStatus.helpers.AsyncTaskArrayCompletionListener;
 import pankaj.CandleStickStatus.helpers.HTTPHelper;
+import pankaj.CandleStickStatus.helpers.PreferenceUtils;
 import pankaj.CandleStickStatus.helpers.UtilDateFormat;
 
 /**
@@ -35,6 +36,7 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
     private ModelStock[] models = null;
     private String startDate = null, endDate = null;
     private Context mContext = null;
+    private int greenCandles=0,redCandles=0,boringCandles=0;
 
     public AsyncStockCandleStatus(Context context,
                                   AsyncTaskArrayCompletionListener completeListener, ArrayList stockList, Date startDate, Date endDate) {
@@ -45,7 +47,6 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
         this.startDate = UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, startDate);
         this.endDate = UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, endDate);
 
-        Log.d("WASTE","startDate: "+startDate+" || endDate"+endDate);
     }
 
     @Override
@@ -67,6 +68,10 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
+
+        PreferenceUtils.putInteger(mContext, PreferenceUtils.GREEN_CANDLE_COUNT, greenCandles);
+        PreferenceUtils.putInteger(mContext,PreferenceUtils.RED_CANDLE_COUNT,redCandles);
+        PreferenceUtils.putInteger(mContext,PreferenceUtils.BORING_CANDLE_COUNT,boringCandles);
 
         if (models != null) {
             mCompleteListener.onTaskComplete((new ArrayList<ModelStock>(Arrays.asList(models))));
@@ -115,7 +120,9 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
                     models[i].setHigh(Double.parseDouble(jObj.getString(Constants.HIGH)));
                     models[i].setLow(Double.parseDouble(jObj.getString(Constants.LOW)));
                     models[i].setDate(jObj.getString(Constants.DATE));
-                    models[i].process();
+                    ModelStock.CandleStatus candleStatuses = models[i].process();
+
+                    calculateNumberOfCandles(candleStatuses);
 
                 }
 
@@ -129,6 +136,7 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
     }
 
     private void differentDays(String strStockPriceList) {
+
 
         ModelStockDao modelStockDao = new ModelStockDao(mContext, DbHelper.getInstance(mContext, DbConfiguration.getInstance(mContext)).getSQLiteDatabase());
         Log.d("WASTE", "In Different Days");
@@ -208,8 +216,9 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
                     models[currentPos].setHigh(high);
                     models[currentPos].setLow(low);
                     models[currentPos].setDate(cursorClose.getString(cursorClose.getColumnIndex(ModelStockDao.date)));
-                    models[currentPos].process();
+                    ModelStock.CandleStatus candleStatuses = models[currentPos].process();
 
+                    calculateNumberOfCandles(candleStatuses);
 
                 }
                 cursorMax.close();
@@ -244,5 +253,22 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
         }
         builder.deleteCharAt(builder.length() - 1);
         return builder.toString();
+    }
+
+    private void calculateNumberOfCandles(ModelStock.CandleStatus candleStatus){
+
+        switch (candleStatus){
+            case EXCITING_GREEN:
+                greenCandles+=1;
+                break;
+            case EXCITING_RED:
+                redCandles+=1;
+                break;
+            case BORING:
+                boringCandles+=1;
+                break;
+
+
+        }
     }
 }

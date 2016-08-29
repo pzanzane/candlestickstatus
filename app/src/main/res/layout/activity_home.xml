@@ -70,4 +70,12 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/txtFromToDate"
         android:layout_marginTop="5dp"></ListView>
+
+    <ProgressBar
+        android:id="@+id/progressbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
 </RelativeLayout>
