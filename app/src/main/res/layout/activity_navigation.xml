@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+
+    <RelativeLayout
+        android:id="@+id/btnWeek"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:background="@drawable/selector_last_week"
+        android:elevation="1dp"
+        >
+
+        <TextView
+            android:id="@+id/txtLastWeek"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Last Week"
+            android:textSize="@dimen/activity_navigation_menu_title_textsize"
+            />
+
+        <TextView
+            android:id="@+id/txtLastWeekDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txtLastWeek"
+            android:layout_centerHorizontal="true"
+            android:text="Last Week"
+            android:textSize="@dimen/activity_navigation_menu_subtitle_textsize"
+            />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:orientation="horizontal"
+        >
+
+        <RelativeLayout
+            android:id="@+id/btnMonth"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:background="@drawable/selector_last_month"
+            android:text="Last Month">
+
+            <TextView
+                android:id="@+id/txtLastMonth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Last Month"
+                android:textSize="@dimen/activity_navigation_menu_title_textsize"
+                />
+
+            <TextView
+                android:id="@+id/txtLastMonthDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtLastMonth"
+                android:layout_centerHorizontal="true"
+                android:text="Last month"
+                android:textSize="@dimen/activity_navigation_menu_subtitle_textsize"
+                />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/btnDay"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:background="@drawable/selector_last_day"
+            android:text="Last Day"
+            >
+
+            <TextView
+                android:id="@+id/txtLastDay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Previous Day"
+                android:textSize="@dimen/activity_navigation_menu_title_textsize"
+                />
+
+            <TextView
+                android:id="@+id/txtLastDayhDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtLastDay"
+                android:layout_centerHorizontal="true"
+                android:text="Last Day"
+                android:textSize="@dimen/activity_navigation_menu_subtitle_textsize"
+                />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnCustomDate"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:background="@drawable/selector_custom_date"
+        android:elevation="1dp"
+        android:orientation="horizontal"
+        android:text="Custom Date Scan"></Button>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:orientation="horizontal"
+        >
+
+        <Button
+            android:id="@+id/btnSort"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.3"
+            android:background="@drawable/selector_sort"
+            android:text="Sort"></Button>
+
+        <Button
+            android:id="@+id/nseHoliday"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.3"
+            android:background="@drawable/selector_nse_holiday"
+            android:text="NSE Holiday"></Button>
+
+        <Button
+            android:id="@+id/btnReadMe"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.3"
+            android:background="@drawable/selector_readme"
+            android:text="README"></Button>
+
+
+    </LinearLayout>
+</LinearLayout>

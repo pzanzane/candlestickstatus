@@ -1,4 +1,4 @@
-package pankaj.CandleStickStatus;
+package pankaj.CandleStickStatus.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
+
+import pankaj.CandleStickStatus.R;
 
 public class DialogSortOptions extends DialogFragment implements OnCheckedChangeListener {
 

@@ -9,16 +9,5 @@
         android:id="@+id/action_sort"
         android:orderInCategory="100"
         android:title="@string/sort"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/action_readme"
-        android:orderInCategory="100"
-        android:title="@string/read_me"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_holidays"
-        android:orderInCategory="100"
-        android:title="@string/nse_holidays"
-        app:showAsAction="never" />
+        app:showAsAction="never"/>
 </menu>

@@ -10,6 +10,7 @@ import java.util.Date;
  */
 public class UtilDateFormat {
 
+    public static final String yyyy_MMM_dd ="yyyy-MMM-dd";
     public static final String yyyy_MM_dd ="yyyy-MM-dd";
     public static final String DD_MM_YY="dd-MM-yy";
     public static final String yyyy_MM_dd_T_HH_mm_ss="yyyy-MM-dd'T'HH:mm:ss";
@@ -43,5 +44,11 @@ public class UtilDateFormat {
 
         return sdf.format(c.getTime());
 
+    }
+
+    public static Date toDate(String pattern,String date) throws ParseException {
+
+        SimpleDateFormat formater = new SimpleDateFormat(pattern);
+        return formater.parse(date);
     }
 }

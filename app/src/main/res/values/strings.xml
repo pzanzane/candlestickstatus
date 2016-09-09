@@ -3,4 +3,9 @@
     <string name="read_me">Read Me</string>
     <string name="nse_holidays">NSE Holidays</string>
     <string name="sort">Sort</string>
+
+    <string name="last_week">Last Week</string>
+    <string name="last_month">Last Month</string>
+    <string name="last_day">Last Day</string>
+    <string name="custom_scan">Custom scan</string>
 </resources>

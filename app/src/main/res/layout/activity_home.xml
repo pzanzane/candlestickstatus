@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="pankaj.CandleStickStatus.ActivityHome">
+    tools:context=".ActivityStocksList">
 
 
     <android.support.v7.widget.Toolbar
@@ -16,7 +16,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         tools:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-    <Button
+    <!--<Button
         android:id="@+id/btnStartDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -52,17 +52,19 @@
         android:layout_toRightOf="@id/btnEndDate"
         android:text="Process"
         android:layout_alignTop="@id/btnStartDate"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true"/>-->
 
     <TextView
         android:id="@+id/txtFromToDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btnStartDate"
+        android:layout_below="@id/my_toolbar"
         android:layout_centerHorizontal="true"
+        android:textColor="@android:color/black"
         android:textSize="16dp"
         android:textStyle="bold"
         />
+
     <ListView
 
         android:id="@+id/listStocks"
@@ -73,9 +75,9 @@
 
     <ProgressBar
         android:id="@+id/progressbar"
+        style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="?android:attr/progressBarStyleLarge"
         android:layout_centerInParent="true"
         android:visibility="gone"/>
 </RelativeLayout>

@@ -23,7 +23,10 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:gridlayout-v7:23.0.0'
+
     dependencies { compile 'com.google.code.gson:gson:2.2.4' }
     //compile files('libs/poi-3.7.jar')
-
+    //compile files('libs/YahooFinanceAPI-3.5.0.jar')
+    compile files('libs/poi-3.7.jar')
 }

@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="pankaj.CandleStickStatus"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+    package="pankaj.CandleStickStatus"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
+        android:name="pankaj.CandleStickStatus.StockpricetickerApplication"
         android:allowBackup="true"
         android:icon="@drawable/app_icon_nobg"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:name="pankaj.CandleStickStatus.StockpricetickerApplication">
+        android:theme="@style/AppTheme">
 
-        <activity android:name="pankaj.CandleStickStatus.ActivityHome">
+        <activity android:name=".ActivityStocksList">
+
+        </activity>
+        <activity android:name=".ActivityNavigation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

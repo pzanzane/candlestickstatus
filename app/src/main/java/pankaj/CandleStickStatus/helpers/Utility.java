@@ -1,6 +1,8 @@
 package pankaj.CandleStickStatus.helpers;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,5 +57,33 @@ public class Utility {
         }
 
         return null;
+    }
+
+
+    public static String readFile(Context context,int resource) {
+
+        try {
+            return IOUtils.readFromFile(context.getResources().openRawResource(resource));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return " Error While Reading File";
+        }
+
+    }
+
+    public static void showAlertDialog(Context context,String message) {
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(message);
+        builder.setNeutralButton(
+                "Thanks", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }
+        );
+        builder.create().show();
     }
 }
