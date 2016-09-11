@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import pankaj.CandleStickStatus.helpers.AsyncTaskArrayCompletionListener;
 import pankaj.CandleStickStatus.helpers.HTTPHelper;
 import pankaj.CandleStickStatus.helpers.PreferenceUtils;
 import pankaj.CandleStickStatus.helpers.UtilDateFormat;
+import pankaj.CandleStickStatus.helpers.Utility;
 
 /**
  * Created by pankaj on 8/16/16.
@@ -161,9 +163,8 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
             try {
                 JSONArray jsonStartArray = new JSONObject(responseObjectStartDate.getStrResponse()).getJSONObject(Constants.QUERY).getJSONObject(Constants.RESULTS).getJSONArray(Constants.QUOTE);
 
-
-
-
+                Log.d("WASTE","strStockPriceList::"+strStockPriceList);
+                Log.d("WASTE","Listsize::"+stockList.size());
                 for (int i = 0; i < jsonStartArray.length(); i++) {
 
                     JSONObject jObjStart = jsonStartArray.getJSONObject(i);
@@ -181,16 +182,18 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
                 }
 
 
-                Cursor cursorMax = modelStockDao.cursorRawQuery("SELECT "+ModelStockDao.symbol+",max("+ModelStockDao.high+") high,min("+ModelStockDao.low+") low FROM "+ModelStockDao.TABLE_NAME+" group by symbol order by symbol");
+                String strMax = "SELECT "+ModelStockDao.symbol+",max("+ModelStockDao.high+") high,min("+ModelStockDao.low+") low FROM "+ModelStockDao.TABLE_NAME+" group by symbol order by symbol";
+                Cursor cursorMax = modelStockDao.cursorRawQuery(strMax);
 
+                String strOpen = "SELECT "+ModelStockDao.symbol+","+ModelStockDao.open+" FROM "+ModelStockDao.TABLE_NAME+" WHERE "+ModelStockDao.date+" LIKE '"+startDate+"' group by symbol order by symbol";
+                Cursor cursorOpen = modelStockDao.cursorRawQuery(strOpen);
 
+                String strClose="SELECT "+ModelStockDao.symbol+","+ModelStockDao.close+","+ModelStockDao.date+" FROM " + ModelStockDao.TABLE_NAME + " WHERE " + ModelStockDao.date + " LIKE '" + endDate + "' group by symbol order by symbol";
+                Cursor cursorClose = modelStockDao.cursorRawQuery(strClose);
 
-                Cursor cursorOpen = modelStockDao.cursorRawQuery("SELECT "+ModelStockDao.symbol+","+ModelStockDao.open+" FROM "+ModelStockDao.TABLE_NAME+" WHERE "+ModelStockDao.date+" LIKE '"+startDate+"' group by symbol order by symbol");
-
-
-                Cursor cursorClose = modelStockDao.cursorRawQuery("SELECT "+ModelStockDao.symbol+","+ModelStockDao.close+","+ModelStockDao.date+" FROM " + ModelStockDao.TABLE_NAME + " WHERE " + ModelStockDao.date + " LIKE '" + endDate + "' group by symbol order by symbol");
-
-
+                Log.d("CURSOR","max:"+strMax);
+                Log.d("CURSOR","open:"+strOpen);
+                Log.d("CURSOR","close:"+strClose);
 
 
                 models = new ModelStock[cursorMax.getCount()];

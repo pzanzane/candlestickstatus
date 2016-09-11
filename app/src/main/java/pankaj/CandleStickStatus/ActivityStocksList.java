@@ -62,6 +62,7 @@ public class ActivityStocksList extends AppCompatActivity implements AsyncTaskAr
         endDate = new Date(getIntent().getExtras().getLong(END_DATE));
 
         Log.d("WASTE", "Start:" + startDate + "\n" + " End:" + endDate);
+
     }
 
 

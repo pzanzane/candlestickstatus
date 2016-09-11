@@ -100,6 +100,7 @@ public class ActivityNavigation extends AppCompatActivity implements View.OnClic
         btnCustomDate.setOnClickListener(this);
         btnReadMe.setOnClickListener(this);
 
+
     }
 
     @Override
@@ -350,6 +351,7 @@ public class ActivityNavigation extends AppCompatActivity implements View.OnClic
 
         Log.d("WASTE", "Last monday:" + calendarMonday.getTime());
         Log.d("WASTE", "Last friday:" + calendarFriday.getTime());
+
     }
 
     private void setAllDays() {

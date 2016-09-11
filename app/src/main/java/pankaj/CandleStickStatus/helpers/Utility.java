@@ -2,12 +2,20 @@ package pankaj.CandleStickStatus.helpers;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import pankaj.CandleStickStatus.R;
+import pankaj.CandleStickStatus.db.DbConfiguration;
+import pankaj.CandleStickStatus.db.DbHelper;
 import pankaj.CandleStickStatus.db.Models.ModelCategory;
 
 /**
@@ -85,5 +95,25 @@ public class Utility {
                 }
         );
         builder.create().show();
+    }
+
+    public static void writeDBTOSD(Context context) throws IOException {
+
+        String dbPath = DbConfiguration.getInstance(context).getDatabasePath()+ File.separator+DbConfiguration.getInstance(context).getDatabaseName();
+        String filePath = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()+File.separator+DbConfiguration.getInstance(context).getDatabaseName();
+        Log.d("WASTE","Path::"+dbPath);
+
+        BufferedInputStream buffIn = new BufferedInputStream(new FileInputStream(new File(dbPath)));
+        BufferedOutputStream buffOut = new BufferedOutputStream(new FileOutputStream(new File(filePath)));
+
+        int len=0;
+        byte[] byteIn = new byte[1024];
+        while ((len = buffIn.read(byteIn)) > 0){
+            buffOut.write(byteIn, 0, len);
+        }
+
+        buffIn.close();
+        buffOut.flush();
+        buffOut.close();
     }
 }
