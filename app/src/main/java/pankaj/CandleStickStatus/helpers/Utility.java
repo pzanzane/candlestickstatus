@@ -9,8 +9,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,6 +24,8 @@ import pankaj.CandleStickStatus.db.Models.ModelCategory;
  */
 public class Utility {
 
+    private static List<String> lisHoliday = null;
+
     public static List<ModelCategory> getList(Context context) throws IOException, JSONException {
 
         List<ModelCategory> listModelStocks = new ArrayList<>();
@@ -31,36 +35,53 @@ public class Utility {
 
         Iterator<String> iterator = jsonParent.keys();
 
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             String key = iterator.next();
             JSONArray jsonArray = jsonParent.getJSONArray(key);
 
             ModelCategory model = new ModelCategory();
             model.setStrCategory(key);
-            model.setListStocks(Arrays.asList(StringUtils.getStringArray(jsonArray.toString().replaceAll("\"",""))));
+            model.setListStocks(Arrays.asList(StringUtils.getStringArray(jsonArray.toString().replaceAll("\"", ""))));
             listModelStocks.add(model);
         }
 
         return listModelStocks;
     }
 
-    public static List<ModelCategory> getList(String filePath) throws IOException, JSONException {
+    public static List<String> getNSEHolidayList(Context context) throws IOException, JSONException {
 
-        String stringJson = IOUtils.readFromFile(filePath);
+        List<String> listHoliday = new ArrayList<>();
+
+        String stringJson = IOUtils.readFromFile(context.getResources().openRawResource(R.raw.nse_holiday_json));
+        JSONObject jsonParent = new JSONObject(stringJson);
+        JSONArray jsonArray = jsonParent.getJSONArray("nse_holiday");
+
+        for (int count = 0; count < jsonArray.length(); count++) {
+            listHoliday.add(jsonArray.getString(count).replaceAll("\"", ""));
+        }
+
+        return listHoliday;
+    }
+
+    public static HashMap<String, List<String>> getHashMap(Context context) throws IOException, JSONException {
+
+        HashMap<String, List<String>> map = new HashMap<>();
+        String stringJson = IOUtils.readFromFile(context.getResources().openRawResource(R.raw.stock_list));
         JSONObject jsonParent = new JSONObject(stringJson);
 
         Iterator<String> iterator = jsonParent.keys();
 
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             String key = iterator.next();
-            System.out.println(key);
+            JSONArray jsonArray = jsonParent.getJSONArray(key);
+            map.put(key, Arrays.asList(StringUtils.getStringArray(jsonArray.toString().replaceAll("\"", ""))));
         }
 
-        return null;
+        return map;
     }
 
 
-    public static String readFile(Context context,int resource) {
+    public static String readFile(Context context, int resource) {
 
         try {
             return IOUtils.readFromFile(context.getResources().openRawResource(resource));
@@ -71,7 +92,7 @@ public class Utility {
 
     }
 
-    public static void showAlertDialog(Context context,String message) {
+    public static void showAlertDialog(Context context, String message) {
 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -85,5 +106,22 @@ public class Utility {
                 }
         );
         builder.create().show();
+    }
+
+    public static boolean isHoliday(Context context, String date) throws IOException, JSONException, ParseException {
+
+        if (lisHoliday == null) {
+            lisHoliday = Utility.getNSEHolidayList(context);
+
+        }
+        return lisHoliday.contains(
+                String.valueOf(
+                        UtilDateFormat.format(
+                                UtilDateFormat.yyyy_MMM_dd,
+                                UtilDateFormat.yyyy_MM_dd,
+                                date
+                        )
+                )
+        );
     }
 }

@@ -14,12 +14,16 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.Toast;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
 import pankaj.CandleStickStatus.R;
 import pankaj.CandleStickStatus.helpers.UtilDateFormat;
+import pankaj.CandleStickStatus.helpers.Utility;
 
 /**
  * Created by pankaj on 9/9/16.
@@ -45,10 +49,12 @@ public class DialogDateRange extends DialogFragment implements OnClickListener {
         return view;
     }
 
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         dateRangePicker = (IDateRangePicker) activity;
+
     }
 
     private void showDatePicker(Activity activity, final Button btnDate) {
@@ -82,6 +88,39 @@ public class DialogDateRange extends DialogFragment implements OnClickListener {
                     Date startDate = UtilDateFormat.toDate(UtilDateFormat.yyyy_MMM_dd, btnStartDate.getText().toString());
                     Date endDate = UtilDateFormat.toDate(UtilDateFormat.yyyy_MMM_dd, btnEndDate.getText().toString());
 
+                    Calendar calStart = Calendar.getInstance();
+                    calStart.setTime(startDate);
+                    calStart.get(Calendar.DAY_OF_WEEK);
+
+                    Calendar calEnd = Calendar.getInstance();
+                    calEnd.setTime(endDate);
+                    calEnd.get(Calendar.DAY_OF_WEEK);
+
+                    if (calStart.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY ||
+                            calStart.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+
+                        Utility.showAlertDialog(getActivity(), " Start Date cannot be saturday or sundays");
+                        return;
+
+                    } else if (calEnd.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY ||
+                            calEnd.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                        Utility.showAlertDialog(getActivity(), " End Date cannot be saturday or sundays");
+                        return;
+                    } else if (Utility.isHoliday(getActivity(), btnStartDate.getText().toString())) {
+
+                        Utility.showAlertDialog(getActivity(), btnStartDate.getText() + " is NSE holiday Start date and End date cannot be holiday");
+
+                        return;
+
+
+                    } else if (Utility.isHoliday(getActivity(), btnEndDate.getText().toString())) {
+
+                        Utility.showAlertDialog(getActivity(), btnEndDate.getText() + " is NSE holiday Start date and End date cannot be holiday");
+                        return;
+
+                    }
+
+
                     if (startDate.getTime() > endDate.getTime()) {
                         Toast.makeText(getActivity(), "Start Date should smaller than end date", Toast.LENGTH_SHORT).show();
                         return;
@@ -92,6 +131,10 @@ public class DialogDateRange extends DialogFragment implements OnClickListener {
 
                     );
                 } catch (ParseException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 break;

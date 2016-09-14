@@ -19,28 +19,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 
 import pankaj.CandleStickStatus.adapters.AdapterListStocks;
-import pankaj.CandleStickStatus.db.Models.ModelCategory;
 import pankaj.CandleStickStatus.db.Models.ModelStock;
 import pankaj.CandleStickStatus.fragments.DialogSortOptions;
 import pankaj.CandleStickStatus.fragments.DialogSortOptions.ISortCallBack;
 import pankaj.CandleStickStatus.helpers.AsyncTaskArrayCompletionListener;
 import pankaj.CandleStickStatus.helpers.PreferenceUtils;
 import pankaj.CandleStickStatus.helpers.UtilDateFormat;
-import pankaj.CandleStickStatus.helpers.Utility;
 
 public class ActivityStocksList extends AppCompatActivity implements AsyncTaskArrayCompletionListener<ModelStock>,
         ISortCallBack {
 
-    public static final String START_DATE = "START_DATE", END_DATE = "END_DATE";
+    public static final String START_DATE = "START_DATE", END_DATE = "END_DATE", STOCK_LIST = "STOCK_LIST";
     private ListView mListViewStocks = null;
     private TextView txtFromToDate = null;
     private ProgressBar progressbar = null;
     private AdapterListStocks adapterListStocks = null;
     private Date startDate = null, endDate = null;
+    private List<String> stockList = null;
 
 
     @Override
@@ -60,8 +58,9 @@ public class ActivityStocksList extends AppCompatActivity implements AsyncTaskAr
 
         startDate = new Date(getIntent().getExtras().getLong(START_DATE));
         endDate = new Date(getIntent().getExtras().getLong(END_DATE));
+        stockList = getIntent().getExtras().getStringArrayList(STOCK_LIST);
 
-        Log.d("WASTE", "Start:" + startDate + "\n" + " End:" + endDate);
+        Log.d("WASTE", "Start:" + startDate + "\n" + " End:" + endDate + " listsize:" + stockList.size());
     }
 
 
@@ -75,7 +74,7 @@ public class ActivityStocksList extends AppCompatActivity implements AsyncTaskAr
     @Override
     public void onTaskComplete(ArrayList<ModelStock> listModelPrices) {
 
-
+        Log.d("WASTE", "Input listsize:" + stockList.size() + " Output listsize:" + listModelPrices.size());
         progressbar.setVisibility(View.GONE);
         String dateTime = UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, startDate) + "     To   " + UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, endDate);
         String candlesCount = " Green: " + PreferenceUtils.getInteger(this, PreferenceUtils.GREEN_CANDLE_COUNT)
@@ -132,21 +131,10 @@ public class ActivityStocksList extends AppCompatActivity implements AsyncTaskAr
         }
 
         progressbar.setVisibility(View.VISIBLE);
-        List<ModelCategory> modelCategory = Utility.getList(ActivityStocksList.this);
 
-
-        HashSet<String> hashList = new HashSet<>();
-        for (ModelCategory category : modelCategory) {
-
-            hashList.addAll(category.getListStocks());
-        }
-
-        ArrayList<String> list = new ArrayList<>();
-        list.addAll(hashList);
-        Collections.sort(list);
         AsyncStockCandleStatus async = new AsyncStockCandleStatus(
                 ActivityStocksList.this, ActivityStocksList.this,
-                list, startDate,
+                new ArrayList(stockList), startDate,
                 endDate
         );
         async.execute();

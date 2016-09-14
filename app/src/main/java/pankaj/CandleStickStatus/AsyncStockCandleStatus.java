@@ -29,14 +29,14 @@ import pankaj.CandleStickStatus.helpers.UtilDateFormat;
 /**
  * Created by pankaj on 8/16/16.
  */
-public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
+public class AsyncStockCandleStatus extends AsyncTask<Void, Void, Void> {
 
     private AsyncTaskArrayCompletionListener<ModelStock> mCompleteListener = null;
     private List<String> stockList = null;
     private ModelStock[] models = null;
     private String startDate = null, endDate = null;
     private Context mContext = null;
-    private int greenCandles=0,redCandles=0,boringCandles=0;
+    private int greenCandles = 0, redCandles = 0, boringCandles = 0;
 
     public AsyncStockCandleStatus(Context context,
                                   AsyncTaskArrayCompletionListener completeListener, ArrayList stockList, Date startDate, Date endDate) {
@@ -54,12 +54,11 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
 
         String strStockPriceList = getListToCommaSeperatedValues(stockList);
 
-        if(startDate.equalsIgnoreCase(endDate)){
+        if (startDate.equalsIgnoreCase(endDate)) {
             sameDay(strStockPriceList);
-        }else{
+        } else {
             differentDays(strStockPriceList);
         }
-
 
 
         return null;
@@ -70,8 +69,8 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
         super.onPostExecute(aVoid);
 
         PreferenceUtils.putInteger(mContext, PreferenceUtils.GREEN_CANDLE_COUNT, greenCandles);
-        PreferenceUtils.putInteger(mContext,PreferenceUtils.RED_CANDLE_COUNT,redCandles);
-        PreferenceUtils.putInteger(mContext,PreferenceUtils.BORING_CANDLE_COUNT,boringCandles);
+        PreferenceUtils.putInteger(mContext, PreferenceUtils.RED_CANDLE_COUNT, redCandles);
+        PreferenceUtils.putInteger(mContext, PreferenceUtils.BORING_CANDLE_COUNT, boringCandles);
 
         if (models != null) {
             mCompleteListener.onTaskComplete((new ArrayList<ModelStock>(Arrays.asList(models))));
@@ -81,7 +80,7 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
 
     }
 
-    private void sameDay(String strStockPriceList){
+    private void sameDay(String strStockPriceList) {
 
         HTTPHelper.ResponseObject responseObject = null;
         String url = "https://query.yahooapis.com/v1/public/yql?";
@@ -130,7 +129,7 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }  else{
+        } else {
             //Error
         }
     }
@@ -162,8 +161,6 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
                 JSONArray jsonStartArray = new JSONObject(responseObjectStartDate.getStrResponse()).getJSONObject(Constants.QUERY).getJSONObject(Constants.RESULTS).getJSONArray(Constants.QUOTE);
 
 
-
-
                 for (int i = 0; i < jsonStartArray.length(); i++) {
 
                     JSONObject jObjStart = jsonStartArray.getJSONObject(i);
@@ -181,20 +178,17 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
                 }
 
 
-                Cursor cursorMax = modelStockDao.cursorRawQuery("SELECT "+ModelStockDao.symbol+",max("+ModelStockDao.high+") high,min("+ModelStockDao.low+") low FROM "+ModelStockDao.TABLE_NAME+" group by symbol order by symbol");
+                Cursor cursorMax = modelStockDao.cursorRawQuery("SELECT " + ModelStockDao.symbol + ",max(" + ModelStockDao.high + ") high,min(" + ModelStockDao.low + ") low FROM " + ModelStockDao.TABLE_NAME + " group by symbol order by symbol");
 
 
-
-                Cursor cursorOpen = modelStockDao.cursorRawQuery("SELECT "+ModelStockDao.symbol+","+ModelStockDao.open+" FROM "+ModelStockDao.TABLE_NAME+" WHERE "+ModelStockDao.date+" LIKE '"+startDate+"' group by symbol order by symbol");
-
-
-                Cursor cursorClose = modelStockDao.cursorRawQuery("SELECT "+ModelStockDao.symbol+","+ModelStockDao.close+","+ModelStockDao.date+" FROM " + ModelStockDao.TABLE_NAME + " WHERE " + ModelStockDao.date + " LIKE '" + endDate + "' group by symbol order by symbol");
+                Cursor cursorOpen = modelStockDao.cursorRawQuery("SELECT " + ModelStockDao.symbol + "," + ModelStockDao.open + " FROM " + ModelStockDao.TABLE_NAME + " WHERE " + ModelStockDao.date + " LIKE '" + startDate + "' group by symbol order by symbol");
 
 
+                Cursor cursorClose = modelStockDao.cursorRawQuery("SELECT " + ModelStockDao.symbol + "," + ModelStockDao.close + "," + ModelStockDao.date + " FROM " + ModelStockDao.TABLE_NAME + " WHERE " + ModelStockDao.date + " LIKE '" + endDate + "' group by symbol order by symbol");
 
 
                 models = new ModelStock[cursorMax.getCount()];
-                while (cursorMax.moveToNext()){
+                while (cursorMax.moveToNext()) {
 
                     int currentPos = cursorMax.getPosition();
 
@@ -234,38 +228,38 @@ public class AsyncStockCandleStatus extends AsyncTask<Void,Void,Void> {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             modelStockDao.deleteAll();
         }
 
     }
 
-    private String getListToCommaSeperatedValues(List<String> list){
+    private String getListToCommaSeperatedValues(List<String> list) {
 
 
         String[] values = list.toArray(new String[]{});
 
         StringBuilder builder = new StringBuilder();
-        for(String value:values){
-            value+=".ns";
-            builder.append("\""+value+"\"");
+        for (String value : values) {
+            value += ".ns";
+            builder.append("\"" + value + "\"");
             builder.append(",");
         }
         builder.deleteCharAt(builder.length() - 1);
         return builder.toString();
     }
 
-    private void calculateNumberOfCandles(ModelStock.CandleStatus candleStatus){
+    private void calculateNumberOfCandles(ModelStock.CandleStatus candleStatus) {
 
-        switch (candleStatus){
+        switch (candleStatus) {
             case EXCITING_GREEN:
-                greenCandles+=1;
+                greenCandles += 1;
                 break;
             case EXCITING_RED:
-                redCandles+=1;
+                redCandles += 1;
                 break;
             case BORING:
-                boringCandles+=1;
+                boringCandles += 1;
                 break;
 
 

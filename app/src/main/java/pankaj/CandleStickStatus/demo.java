@@ -20,14 +20,14 @@ public class demo {
 
     public static void main(String z[]){
 
-        System.out.println(randInt(3,5));
+        calculate();
     }
-    public static void calculate(String z[]) {
+    public static void calculate() {
 
 
         POIFSFileSystem fs = null;
         try {
-            fs = new POIFSFileSystem(new FileInputStream(new File("/home/pankaj/Desktop/BIGTRADELIST.xls")));
+            fs = new POIFSFileSystem(new FileInputStream(new File("/home/pankaj/Desktop/excels/NiftyQuality30.xls")));
             HSSFWorkbook wb = new HSSFWorkbook(fs);
             HSSFSheet sheet = wb.getSheetAt(0);
             int rowCount = sheet.getPhysicalNumberOfRows();
@@ -40,6 +40,7 @@ public class demo {
             for (int i = 1; i < rowCount; i++) {
 
                 String name = sheet.getRow(i).getCell(1).getStringCellValue();
+                builder.append("\""+name+"\",");
 
                 double open = Double.parseDouble(sheet.getRow(i).getCell(6).getStringCellValue());
                 double close = Double.parseDouble(sheet.getRow(i).getCell(9).getStringCellValue());
@@ -65,7 +66,7 @@ public class demo {
 
             }
 
-
+            System.out.print(builder.toString());
             printGreenCandles(greenModelStockList);
             printRedCandles(redModelStockList);
             printBoringCandles(boringModelStockList);

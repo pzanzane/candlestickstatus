@@ -18,13 +18,21 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 import pankaj.CandleStickStatus.fragments.DialogDateRange;
 import pankaj.CandleStickStatus.fragments.DialogDateRange.IDateRangePicker;
 import pankaj.CandleStickStatus.fragments.DialogSortOptions;
+import pankaj.CandleStickStatus.fragments.DialogStockListSelection;
+import pankaj.CandleStickStatus.fragments.DialogStockListSelection.IDialogStockSelection;
 import pankaj.CandleStickStatus.helpers.PreferenceUtils;
 import pankaj.CandleStickStatus.helpers.UtilDateFormat;
 import pankaj.CandleStickStatus.helpers.Utility;
@@ -33,7 +41,7 @@ import pankaj.CandleStickStatus.helpers.Utility;
  * Created by pankaj on 9/9/16.
  */
 public class ActivityNavigation extends AppCompatActivity implements View.OnClickListener,
-        DialogSortOptions.ISortCallBack, IDateRangePicker {
+        DialogSortOptions.ISortCallBack, IDateRangePicker, IDialogStockSelection {
 
     private long delayMillis = 50;
     private long speed = 150;
@@ -137,13 +145,23 @@ public class ActivityNavigation extends AppCompatActivity implements View.OnClic
                 dialogDateRange.show(getSupportFragmentManager(), "DialogDateRange");
                 break;
             case R.id.btnWeek:
-                callStockList(calendarMonday.getTime(), calendarFriday.getTime());
+                showStockSelectionDialog(
+                        UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, calendarMonday.getTime()),
+                        UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, calendarFriday.getTime())
+                );
                 break;
             case R.id.btnMonth:
-                callStockList(calendarFirstDayOfMonth.getTime(), calendarLastDayOfMonth.getTime());
+                showStockSelectionDialog(
+                        UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, calendarFirstDayOfMonth.getTime()),
+                        UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, calendarLastDayOfMonth.getTime())
+                );
+
                 break;
             case R.id.btnDay:
-                callStockList(calendarPreviousDay.getTime(), calendarPreviousDay.getTime());
+                showStockSelectionDialog(
+                        UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, calendarPreviousDay.getTime()),
+                        UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, calendarPreviousDay.getTime())
+                );
                 break;
         }
     }
@@ -315,16 +333,19 @@ public class ActivityNavigation extends AppCompatActivity implements View.OnClic
     public void dateRangePicker(DialogFragment dialog, Date startDate, Date endDate) {
         dialog.dismiss();
 
-        callStockList(startDate, endDate);
+        showStockSelectionDialog(
+                UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, startDate),
+                UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, endDate)
+        );
 
     }
 
-    private void callStockList(Date startDate, Date endDate) {
+    private void callStockList(List<String> stockList, Date startDate, Date endDate) {
 
         Intent intent = new Intent(this, ActivityStocksList.class);
         intent.putExtra(ActivityStocksList.START_DATE, startDate.getTime());
         intent.putExtra(ActivityStocksList.END_DATE, endDate.getTime());
-
+        intent.putStringArrayListExtra(ActivityStocksList.STOCK_LIST, new ArrayList<String>(stockList));
         startActivity(intent);
     }
 
@@ -333,23 +354,35 @@ public class ActivityNavigation extends AppCompatActivity implements View.OnClic
         calendarMonday = Calendar.getInstance();
         calendarFriday = Calendar.getInstance();
 
-        calendar.setFirstDayOfWeek(Calendar.MONDAY);
-        calendarMonday.setFirstDayOfWeek(Calendar.MONDAY);
-        calendarFriday.setFirstDayOfWeek(Calendar.MONDAY);
-
-        if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY &&
-                calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
-
+        if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
             calendarMonday.add(Calendar.WEEK_OF_YEAR, -1);
             calendarFriday.add(Calendar.WEEK_OF_YEAR, -1);
-
-
         }
         calendarMonday.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         calendarFriday.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
 
         Log.d("WASTE", "Last monday:" + calendarMonday.getTime());
         Log.d("WASTE", "Last friday:" + calendarFriday.getTime());
+        try {
+            while (Utility.isHoliday(this, UtilDateFormat.format(UtilDateFormat.yyyy_MMM_dd, calendarMonday.getTime()))) {
+
+                calendarMonday.add(Calendar.DAY_OF_MONTH, 1);
+            }
+
+            while (Utility.isHoliday(this, UtilDateFormat.format(UtilDateFormat.yyyy_MMM_dd, calendarFriday.getTime()))) {
+
+                calendarFriday.add(Calendar.DAY_OF_MONTH, -1);
+
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setAllDays() {
@@ -372,10 +405,29 @@ public class ActivityNavigation extends AppCompatActivity implements View.OnClic
         calendarFirstDayOfMonth.add(Calendar.MONTH, -1);
         calendarFirstDayOfMonth.set(Calendar.DAY_OF_MONTH, 1);
 
-        if (calendarFirstDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-            calendarFirstDayOfMonth.add(Calendar.DAY_OF_MONTH, 2);
-        } else if (calendarFirstDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            calendarFirstDayOfMonth.add(Calendar.DAY_OF_MONTH, 1);
+        try {
+            do {
+
+                if (calendarFirstDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+                    calendarFirstDayOfMonth.add(Calendar.DAY_OF_MONTH, 2);
+                } else if (calendarFirstDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                    calendarFirstDayOfMonth.add(Calendar.DAY_OF_MONTH, 1);
+                } else if (Utility.isHoliday(this, UtilDateFormat.format(UtilDateFormat.yyyy_MMM_dd, calendarFirstDayOfMonth.getTime()))) {
+                    if (calendarFirstDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+                        calendarFirstDayOfMonth.add(Calendar.DAY_OF_MONTH, 3);
+                    } else {
+                        calendarFirstDayOfMonth.add(Calendar.DAY_OF_MONTH, 1);
+                    }
+                }
+
+            }
+            while (Utility.isHoliday(this, UtilDateFormat.format(UtilDateFormat.yyyy_MMM_dd, calendarFirstDayOfMonth.getTime())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
 
@@ -383,11 +435,31 @@ public class ActivityNavigation extends AppCompatActivity implements View.OnClic
         calendarLastDayOfMonth.add(Calendar.MONTH, -1);
         calendarLastDayOfMonth.set(Calendar.DAY_OF_MONTH, calendarLastDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH));
 
-        if (calendarLastDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-            calendarLastDayOfMonth.add(Calendar.DAY_OF_MONTH, -1);
-        } else if (calendarLastDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            calendarLastDayOfMonth.add(Calendar.DAY_OF_MONTH, -2);
+        try {
+            do {
+
+                if (calendarLastDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+                    calendarLastDayOfMonth.add(Calendar.DAY_OF_MONTH, -1);
+                } else if (calendarLastDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                    calendarLastDayOfMonth.add(Calendar.DAY_OF_MONTH, -2);
+                } else if (Utility.isHoliday(this, UtilDateFormat.format(UtilDateFormat.yyyy_MMM_dd, calendarFirstDayOfMonth.getTime()))) {
+                    if (calendarLastDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+                        calendarLastDayOfMonth.add(Calendar.DAY_OF_MONTH, -3);
+                    } else {
+                        calendarLastDayOfMonth.add(Calendar.DAY_OF_MONTH, -1);
+                    }
+                }
+
+            }
+            while (Utility.isHoliday(this, UtilDateFormat.format(UtilDateFormat.yyyy_MMM_dd, calendarLastDayOfMonth.getTime())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
+
 
         Log.d("WASTE", "Month First:" + calendarFirstDayOfMonth.getTime());
         Log.d("WASTE", "Month Last:" + calendarLastDayOfMonth.getTime());
@@ -397,14 +469,49 @@ public class ActivityNavigation extends AppCompatActivity implements View.OnClic
 
         calendarPreviousDay = Calendar.getInstance();
 
-
-        if (calendarPreviousDay.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
-            calendarPreviousDay.add(Calendar.DAY_OF_MONTH, -3);
-        } else if (calendarPreviousDay.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            calendarPreviousDay.add(Calendar.DAY_OF_MONTH, -2);
-        } else {
-            calendarPreviousDay.add(Calendar.DAY_OF_MONTH, -1);
+        try {
+            do {
+                if (calendarPreviousDay.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+                    calendarPreviousDay.add(Calendar.DAY_OF_MONTH, -3);
+                } else if (calendarPreviousDay.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                    calendarPreviousDay.add(Calendar.DAY_OF_MONTH, -2);
+                } else {
+                    calendarPreviousDay.add(Calendar.DAY_OF_MONTH, -1);
+                }
+            }
+            while (Utility.isHoliday(this, UtilDateFormat.format(UtilDateFormat.yyyy_MMM_dd, calendarPreviousDay.getTime())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
         Log.d("WASTE", "previouse Date:" + calendarPreviousDay.getTime());
+    }
+
+
+    private void showStockSelectionDialog(String startDate, String endDate) {
+
+        Bundle bundle = new Bundle();
+        bundle.putString(ActivityStocksList.START_DATE, startDate);
+        bundle.putString(ActivityStocksList.END_DATE, endDate);
+
+        DialogStockListSelection dialogStockListSelection = new DialogStockListSelection();
+        dialogStockListSelection.setArguments(bundle);
+        dialogStockListSelection.show(getSupportFragmentManager(), "");
+    }
+
+    @Override
+    public void onStockOptionSelected(List<String> list, String startDate, String endDate) {
+
+        try {
+            callStockList(
+                    list, UtilDateFormat.toDate(UtilDateFormat.yyyy_MM_dd, startDate),
+                    UtilDateFormat.toDate(UtilDateFormat.yyyy_MM_dd, endDate)
+            );
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 }
