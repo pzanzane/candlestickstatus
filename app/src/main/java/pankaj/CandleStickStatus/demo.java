@@ -18,10 +18,10 @@ import pankaj.CandleStickStatus.db.Models.ModelStock;
  */
 public class demo {
 
-    public static void main(String z[]){
+    public static void main(String z[]) {
 
-        calculate();
     }
+
     public static void calculate() {
 
 
@@ -40,7 +40,7 @@ public class demo {
             for (int i = 1; i < rowCount; i++) {
 
                 String name = sheet.getRow(i).getCell(1).getStringCellValue();
-                builder.append("\""+name+"\",");
+                builder.append("\"" + name + "\",");
 
                 double open = Double.parseDouble(sheet.getRow(i).getCell(6).getStringCellValue());
                 double close = Double.parseDouble(sheet.getRow(i).getCell(9).getStringCellValue());
@@ -83,7 +83,7 @@ public class demo {
         System.out.println("-----------------------------------------------------");
         System.out.println("Green");
         for (ModelStock model : list) {
-            System.out.println(model.getSymbol()+" open:"+model.getOpen()+" close:"+model.getClose()+" High:"+model.getHigh()+" Low:"+model.getLow());
+            System.out.println(model.getSymbol() + " open:" + model.getOpen() + " close:" + model.getClose() + " High:" + model.getHigh() + " Low:" + model.getLow());
         }
     }
 
@@ -92,7 +92,7 @@ public class demo {
         System.out.println("-----------------------------------------------------");
         System.out.println("Red");
         for (ModelStock model : list) {
-            System.out.println(model.getSymbol()+" open:"+model.getOpen()+" close:"+model.getClose()+" High:"+model.getHigh()+" Low:"+model.getLow());
+            System.out.println(model.getSymbol() + " open:" + model.getOpen() + " close:" + model.getClose() + " High:" + model.getHigh() + " Low:" + model.getLow());
         }
     }
 
@@ -101,7 +101,7 @@ public class demo {
         System.out.println("-----------------------------------------------------");
         System.out.println("Boring");
         for (ModelStock model : list) {
-            System.out.println(model.getSymbol()+" open:"+model.getOpen()+" close:"+model.getClose()+" High:"+model.getHigh()+" Low:"+model.getLow());
+            System.out.println(model.getSymbol() + " open:" + model.getOpen() + " close:" + model.getClose() + " High:" + model.getHigh() + " Low:" + model.getLow());
         }
     }
 

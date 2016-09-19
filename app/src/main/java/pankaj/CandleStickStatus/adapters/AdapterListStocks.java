@@ -65,6 +65,9 @@ public class AdapterListStocks extends ArrayAdapter<ModelStock> {
             case EXCITING_RED:
                 mViewGroup.relInternalView.setBackgroundColor(ContextCompat.getColor(mContext, android.R.color.holo_red_dark));
                 break;
+            case NO_DATA:
+                mViewGroup.relInternalView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.grey));
+                break;
         }
 
 

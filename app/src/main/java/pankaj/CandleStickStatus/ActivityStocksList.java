@@ -79,7 +79,10 @@ public class ActivityStocksList extends AppCompatActivity implements AsyncTaskAr
         String dateTime = UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, startDate) + "     To   " + UtilDateFormat.format(UtilDateFormat.yyyy_MM_dd, endDate);
         String candlesCount = " Green: " + PreferenceUtils.getInteger(this, PreferenceUtils.GREEN_CANDLE_COUNT)
                 + " Red: " + PreferenceUtils.getInteger(this, PreferenceUtils.RED_CANDLE_COUNT)
-                + " Boring: " + PreferenceUtils.getInteger(this, PreferenceUtils.BORING_CANDLE_COUNT);
+                + " Boring: " + PreferenceUtils.getInteger(this, PreferenceUtils.BORING_CANDLE_COUNT)
+                + " NoData "+(stockList.size() - (PreferenceUtils.getInteger(this, PreferenceUtils.GREEN_CANDLE_COUNT) +
+                PreferenceUtils.getInteger(this, PreferenceUtils.RED_CANDLE_COUNT)+
+                PreferenceUtils.getInteger(this, PreferenceUtils.BORING_CANDLE_COUNT)));
 
         txtFromToDate.setText(dateTime + "\n" + candlesCount);
         adapterListStocks = new AdapterListStocks(this, 0, listModelPrices);

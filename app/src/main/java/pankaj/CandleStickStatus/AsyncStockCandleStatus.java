@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -33,7 +32,8 @@ public class AsyncStockCandleStatus extends AsyncTask<Void, Void, Void> {
 
     private AsyncTaskArrayCompletionListener<ModelStock> mCompleteListener = null;
     private List<String> stockList = null;
-    private ModelStock[] models = null;
+
+    private List<ModelStock> models = null;
     private String startDate = null, endDate = null;
     private Context mContext = null;
     private int greenCandles = 0, redCandles = 0, boringCandles = 0;
@@ -54,13 +54,26 @@ public class AsyncStockCandleStatus extends AsyncTask<Void, Void, Void> {
 
         String strStockPriceList = getListToCommaSeperatedValues(stockList);
 
+        List<String> mStockExists = null, mStockDoesNotExists = null;
         if (startDate.equalsIgnoreCase(endDate)) {
-            sameDay(strStockPriceList);
+            mStockExists = sameDay(strStockPriceList);
         } else {
-            differentDays(strStockPriceList);
+            mStockExists = differentDays(strStockPriceList);
         }
 
+        mStockDoesNotExists = new ArrayList<>(stockList);
+        mStockDoesNotExists.removeAll(mStockExists);
 
+        Log.d("WASTE", "Exists: " + mStockExists);
+        Log.d("WASTE", "NoData: " + mStockDoesNotExists);
+        for (int i = 0; i < mStockDoesNotExists.size(); i++) {
+
+            ModelStock modelStock = new ModelStock();
+            modelStock.setSymbol(mStockDoesNotExists.get(i));
+            modelStock.process();
+
+            models.add(modelStock);
+        }
         return null;
     }
 
@@ -73,15 +86,16 @@ public class AsyncStockCandleStatus extends AsyncTask<Void, Void, Void> {
         PreferenceUtils.putInteger(mContext, PreferenceUtils.BORING_CANDLE_COUNT, boringCandles);
 
         if (models != null) {
-            mCompleteListener.onTaskComplete((new ArrayList<ModelStock>(Arrays.asList(models))));
+            mCompleteListener.onTaskComplete((new ArrayList<ModelStock>(models)));
         } else {
             mCompleteListener.onException(new Exception("No Data"));
         }
 
     }
 
-    private void sameDay(String strStockPriceList) {
+    private List<String> sameDay(String strStockPriceList) {
 
+        List<String> mStockExists = new ArrayList<>();
         HTTPHelper.ResponseObject responseObject = null;
         String url = "https://query.yahooapis.com/v1/public/yql?";
 
@@ -107,21 +121,25 @@ public class AsyncStockCandleStatus extends AsyncTask<Void, Void, Void> {
                 JSONArray jsonQuotes = jsonParent.getJSONObject(Constants.QUERY).getJSONObject(Constants.RESULTS).getJSONArray(Constants.QUOTE);
 
 
-                models = new ModelStock[jsonQuotes.length()];
+                models = new ArrayList<>();
 
                 for (int i = 0; i < jsonQuotes.length(); i++) {
 
+                    ModelStock model = new ModelStock();
                     JSONObject jObj = jsonQuotes.getJSONObject(i);
-                    models[i] = new ModelStock();
-                    models[i].setSymbol(jObj.getString(Constants.SYMBOL));
-                    models[i].setOpen(Double.parseDouble(jObj.getString(Constants.OPEN)));
-                    models[i].setClose(Double.parseDouble(jObj.getString(Constants.CLOSE)));
-                    models[i].setHigh(Double.parseDouble(jObj.getString(Constants.HIGH)));
-                    models[i].setLow(Double.parseDouble(jObj.getString(Constants.LOW)));
-                    models[i].setDate(jObj.getString(Constants.DATE));
-                    ModelStock.CandleStatus candleStatuses = models[i].process();
 
+                    model.setSymbol(jObj.getString(Constants.SYMBOL));
+                    model.setOpen(Double.parseDouble(jObj.getString(Constants.OPEN)));
+                    model.setClose(Double.parseDouble(jObj.getString(Constants.CLOSE)));
+                    model.setHigh(Double.parseDouble(jObj.getString(Constants.HIGH)));
+                    model.setLow(Double.parseDouble(jObj.getString(Constants.LOW)));
+                    model.setDate(jObj.getString(Constants.DATE));
+                    ModelStock.CandleStatus candleStatuses = model.process();
+
+                    mStockExists.add(jObj.getString(Constants.SYMBOL).replace(".ns", ""));
                     calculateNumberOfCandles(candleStatuses);
+
+                    models.add(model);
 
                 }
 
@@ -132,11 +150,12 @@ public class AsyncStockCandleStatus extends AsyncTask<Void, Void, Void> {
         } else {
             //Error
         }
+        return mStockExists;
     }
 
-    private void differentDays(String strStockPriceList) {
+    private List<String> differentDays(String strStockPriceList) {
 
-
+        List<String> mStockExists = new ArrayList<>();
         ModelStockDao modelStockDao = new ModelStockDao(mContext, DbHelper.getInstance(mContext, DbConfiguration.getInstance(mContext)).getSQLiteDatabase());
         Log.d("WASTE", "In Different Days");
         try {
@@ -187,7 +206,7 @@ public class AsyncStockCandleStatus extends AsyncTask<Void, Void, Void> {
                 Cursor cursorClose = modelStockDao.cursorRawQuery("SELECT " + ModelStockDao.symbol + "," + ModelStockDao.close + "," + ModelStockDao.date + " FROM " + ModelStockDao.TABLE_NAME + " WHERE " + ModelStockDao.date + " LIKE '" + endDate + "' group by symbol order by symbol");
 
 
-                models = new ModelStock[cursorMax.getCount()];
+                models = new ArrayList<>();
                 while (cursorMax.moveToNext()) {
 
                     int currentPos = cursorMax.getPosition();
@@ -202,17 +221,22 @@ public class AsyncStockCandleStatus extends AsyncTask<Void, Void, Void> {
                     Double open = cursorOpen.getDouble(cursorOpen.getColumnIndex(ModelStockDao.open));
                     Double close = cursorClose.getDouble(cursorClose.getColumnIndex(ModelStockDao.close));
 
+                    ModelStock model = new ModelStock();
+                    model.setSymbol(symbol);
+                    model.setOpen(open);
+                    model.setClose(close);
+                    model.setHigh(high);
+                    model.setLow(low);
+                    model.setDate(cursorClose.getString(cursorClose.getColumnIndex(ModelStockDao.date)));
+                    ModelStock.CandleStatus candleStatuses = model.process();
 
-                    models[currentPos] = new ModelStock();
-                    models[currentPos].setSymbol(symbol);
-                    models[currentPos].setOpen(open);
-                    models[currentPos].setClose(close);
-                    models[currentPos].setHigh(high);
-                    models[currentPos].setLow(low);
-                    models[currentPos].setDate(cursorClose.getString(cursorClose.getColumnIndex(ModelStockDao.date)));
-                    ModelStock.CandleStatus candleStatuses = models[currentPos].process();
+                    if(!mStockExists.contains(symbol.replace(".ns", ""))){
+                        mStockExists.add(symbol.replace(".ns", ""));
+                    }
 
                     calculateNumberOfCandles(candleStatuses);
+
+                    models.add(model);
 
                 }
                 cursorMax.close();
@@ -232,6 +256,7 @@ public class AsyncStockCandleStatus extends AsyncTask<Void, Void, Void> {
             modelStockDao.deleteAll();
         }
 
+        return mStockExists;
     }
 
     private String getListToCommaSeperatedValues(List<String> list) {
